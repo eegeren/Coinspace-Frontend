@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coinspace | Coin Detail</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+  <!-- HEADER -->
+  <nav class="bg-gray-800 px-6 py-4 shadow-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="index.html" class="text-2xl font-bold tracking-wide text-indigo-400">Coinspace</a>
+      <div class="text-sm text-gray-400 font-semibold" id="page-title">Loading...</div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- LEFT: Chart -->
+    <section class="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-md">
+      <h2 class="text-xl font-bold mb-4" id="chart-title">Chart</h2>
+      <div class="w-full h-[500px]" id="chart-container"></div>
+    </section>
+
+    <!-- RIGHT: Coin Data -->
+    <aside class="space-y-4">
+      <div class="bg-gray-800 p-5 rounded-xl shadow-md">
+        <h3 class="text-lg font-bold">Price</h3>
+        <p id="price" class="text-2xl text-green-400">-</p>
+        <canvas id="priceChart" height="60" class="mt-2"></canvas>
+      </div>
+      <div class="bg-gray-800 p-5 rounded-xl shadow-md">
+        <h3 class="text-lg font-bold">24h Change</h3>
+        <p id="change" class="text-2xl" style="color: #f87171;">-</p>
+      </div>
+      <div class="bg-gray-800 p-5 rounded-xl shadow-md">
+        <h3 class="text-lg font-bold">Volume</h3>
+        <p id="volume" class="text-2xl text-gray-300">-</p>
+      </div>
+
+      <div class="bg-indigo-800 p-5 rounded-xl shadow-md">
+        <h3 class="text-lg font-bold">RSI</h3>
+        <p id="rsi" class="text-2xl">-</p>
+        <canvas id="rsiChart" height="60" class="mt-2"></canvas>
+      </div>
+
+      <div class="bg-indigo-800 p-5 rounded-xl shadow-md">
+        <h3 class="text-lg font-bold">MACD</h3>
+        <p id="macd" class="text-2xl">-</p>
+        <canvas id="macdChart" height="60" class="mt-2"></canvas>
+      </div>
+
+      <div class="bg-indigo-800 p-5 rounded-xl shadow-md">
+        <h3 class="text-lg font-bold">EMA</h3>
+        <p id="ema" class="text-2xl">-</p>
+        <canvas id="emaChart" height="60" class="mt-2"></canvas>
+      </div>
+
+      <div class="bg-green-600 text-white p-5 rounded-xl shadow-md">
+        <h3 id="signal" class="text-xl font-bold">Signal: -</h3>
+        <p id="confidence" class="text-sm text-green-100">Confidence: -</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- SCRIPT -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const symbol = params.get("symbol")?.toUpperCase() || "BTC";
+    document.getElementById("page-title").textContent = symbol + " Details";
+    document.getElementById("chart-title").textContent = `${symbol}/USDT Chart`;
+
+    document.getElementById("chart-container").innerHTML = `
+      <iframe src="https://www.tradingview.com/embed-widget/symbol-overview/?locale=en&symbol=BINANCE:${symbol}USDT"
+              class="w-full h-full border-0" allowtransparency="true" frameborder="0"></iframe>
+    `;
+
+    fetch(`http://127.0.0.1:8000/api/price/${symbol}`)
+      .then(res => res.json())
+      .then(data => updateFields(data))
+      .catch(err => {
+        console.error(err);
+        document.getElementById("price").textContent = "Error loading data";
+      });
+
+    const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
+const wsHost = location.host; 
+const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws/${symbol}`);
+
+    ws.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      updateFields(data);
+    };
+
+    // Chart.js mini grafikler
+    const priceChart = new Chart(document.getElementById("priceChart"), chartConfig("green"));
+    const rsiChart   = new Chart(document.getElementById("rsiChart"), chartConfig("blue"));
+    const macdChart  = new Chart(document.getElementById("macdChart"), chartConfig("yellow"));
+    const emaChart   = new Chart(document.getElementById("emaChart"), chartConfig("purple"));
+
+    function chartConfig(color) {
+      return {
+        type: "line",
+        data: {
+          labels: Array(20).fill(""),
+          datasets: [{
+            data: Array(20).fill(null),
+            borderColor: color === "green" ? "#4ade80" :
+                         color === "blue"  ? "#60a5fa" :
+                         color === "yellow"? "#facc15" :
+                         "#a855f7",
+            backgroundColor: "transparent",
+            tension: 0.3
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false }},
+          scales: { x: { display: false }, y: { display: false }},
+          elements: { point: { radius: 0 } }
+        }
+      }
+    }
+
+    function pushToChart(chart, val) {
+      chart.data.datasets[0].data.push(val);
+      if (chart.data.datasets[0].data.length > 20) chart.data.datasets[0].data.shift();
+      chart.update();
+    }
+
+    function updateFields(data) {
+      const priceVal = Number(data.price);
+      document.getElementById("price").textContent = `$${priceVal.toLocaleString()}`;
+      document.getElementById("rsi").textContent = data.rsi;
+      document.getElementById("macd").textContent = data.macd;
+      document.getElementById("ema").textContent = data.ema || "-";
+      document.getElementById("signal").textContent = `Signal: ${data.signal}`;
+      document.getElementById("confidence").textContent = `Confidence: ${data.confidence}%`;
+
+      // Change
+      const changeEl = document.getElementById("change");
+      const changeVal = Number(data.change_24h);
+      changeEl.textContent = `${changeVal.toFixed(2)}%`;
+      changeEl.style.color = changeVal >= 0 ? "#4ade80" : "#f87171";
+
+      // Signal Color
+      const signalEl = document.getElementById("signal");
+      const signal = data.signal?.toUpperCase() || "-";
+      signalEl.className = "text-xl font-bold";
+      signalEl.classList.add(
+        signal === "BUY" ? "text-green-300" :
+        signal === "SELL" ? "text-red-300" : "text-yellow-300"
+      );
+
+      // Volume
+      document.getElementById("volume").textContent = `$${data.volume_24h || "-"}`;
+
+      // Push data to charts
+      pushToChart(priceChart, priceVal);
+      pushToChart(rsiChart, Number(data.rsi));
+      pushToChart(macdChart, data.macd === "Bullish" ? 1 : data.macd === "Bearish" ? -1 : 0);
+      pushToChart(emaChart, data.ema?.toLowerCase() === "golden cross" ? 1 :
+                           data.ema?.toLowerCase() === "death cross"  ? -1 : 0);
+    }
+  </script>
+
+</body>
+</html>
