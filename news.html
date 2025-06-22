@@ -1,75 +1,71 @@
+<!-- news.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Crypto News | Coinspace</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coinspace Haberler</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white font-sans">
-
-  <div class="max-w-7xl mx-auto px-4 py-10">
+  <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-indigo-400">📰 Güncel Kripto Haberleri</h1>
-      <div class="flex space-x-4">
-        <input type="text" id="search" placeholder="Ara..." class="px-3 py-1 rounded bg-gray-700 text-white text-sm">
-        <select id="sort" class="px-2 py-1 rounded bg-gray-700 text-white text-sm">
-          <option value="newest">Yeni</option>
-          <option value="oldest">Eski</option>
+      <h1 class="text-3xl font-bold text-indigo-400">📰 Kripto Haberleri</h1>
+      <div class="flex space-x-2">
+        <input type="text" id="searchInput" placeholder="Haber ara..." class="p-2 rounded bg-gray-700 text-white">
+        <select id="categoryFilter" class="p-2 rounded bg-gray-700 text-white">
+          <option value="">Tümü</option>
+          <option value="bitcoin">Bitcoin</option>
+          <option value="altcoin">Altcoin</option>
+          <option value="regulation">Regülasyon</option>
+          <option value="nft">NFT</option>
+        </select>
+        <select id="sortBy" class="p-2 rounded bg-gray-700 text-white">
+          <option value="desc">Yeni > Eski</option>
+          <option value="asc">Eski > Yeni</option>
         </select>
       </div>
     </div>
 
-    <div id="news-list" class="grid md:grid-cols-3 gap-6"></div>
+    <div id="news-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
   </div>
 
   <script>
-    let allNews = [];
-
     async function fetchNews() {
-      try {
-        const res = await fetch("http://127.0.0.1:8000/api/news");
-        const data = await res.json();
-        allNews = data;
-        renderNews(data);
-      } catch (err) {
-        console.error("Haberler yüklenemedi:", err);
-      }
-    }
+      const res = await fetch("http://127.0.0.1:8000/api/news");
+      const newsList = await res.json();
 
-    function renderNews(newsItems) {
-      const container = document.getElementById("news-list");
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const category = document.getElementById("categoryFilter").value;
+      const sortBy = document.getElementById("sortBy").value;
+
+      const filtered = newsList
+        .filter(n => (!search || n.title.toLowerCase().includes(search)))
+        .filter(n => (!category || n.category === category))
+        .sort((a, b) => sortBy === "asc" ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date));
+
+      const container = document.getElementById("news-container");
       container.innerHTML = "";
-      newsItems.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "bg-gray-800 p-4 rounded-xl shadow hover:shadow-lg transition";
-        div.innerHTML = `
-          <img src="${item.imgURL}" class="w-full h-40 object-cover rounded mb-2">
-          <h3 class="text-lg font-bold mb-1">${item.title}</h3>
-          <p class="text-sm text-gray-400 mb-2">${item.description.slice(0, 100)}...</p>
-          <a href="${item.link}" target="_blank" class="text-indigo-400 text-sm hover:underline">Habere Git</a>
+
+      filtered.forEach(news => {
+        const card = document.createElement("div");
+        card.className = "bg-gray-800 rounded-xl p-4 shadow hover:shadow-xl";
+        card.innerHTML = `
+          <img src="${news.imgURL}" class="w-full h-40 object-cover rounded mb-3">
+          <h3 class="text-lg font-bold">${news.title}</h3>
+          <p class="text-sm text-gray-400 mt-2">${news.summary.slice(0, 100)}...</p>
+          <a href="news-detail.html?id=${news.id}" class="text-indigo-400 text-sm mt-2 inline-block hover:underline">Detaylı Gör</a>
         `;
-        container.appendChild(div);
+        container.appendChild(card);
       });
     }
 
-    document.getElementById("search").addEventListener("input", e => {
-      const keyword = e.target.value.toLowerCase();
-      const filtered = allNews.filter(n => n.title.toLowerCase().includes(keyword) || n.description.toLowerCase().includes(keyword));
-      renderNews(filtered);
-    });
-
-    document.getElementById("sort").addEventListener("change", e => {
-      const sorted = [...allNews].sort((a, b) => {
-        return e.target.value === "oldest"
-          ? new Date(a.publishedAt) - new Date(b.publishedAt)
-          : new Date(b.publishedAt) - new Date(a.publishedAt);
-      });
-      renderNews(sorted);
-    });
+    document.getElementById("searchInput").addEventListener("input", fetchNews);
+    document.getElementById("categoryFilter").addEventListener("change", fetchNews);
+    document.getElementById("sortBy").addEventListener("change", fetchNews);
 
     fetchNews();
+    setInterval(fetchNews, 300000); // 5 dakikada bir yenile
   </script>
-
 </body>
 </html>
