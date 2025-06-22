@@ -47,7 +47,7 @@
 
   <!-- Script -->
   <script>
-    const API_URL = "http://127.0.0.1:8000/api/news/all";
+    const API_URL = fetch("http://127.0.0.1:8000/api/news")
     const container = document.getElementById("news-container");
     const categorySelect = document.getElementById("category");
     const sortSelect = document.getElementById("sort");
