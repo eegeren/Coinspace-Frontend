@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
@@ -8,16 +9,20 @@ load_dotenv()
 
 app = FastAPI()
 
-# CORS ayarları
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Geliştirme aşamasında tüm frontend isteklerine açık
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 NEWS_API_KEY = os.getenv("NEWS_API_KEY") or "506d562e0d4a434c97df2e3a51e4cd1c"
+
+LIKES = {}
+
+class LikeRequest(BaseModel):
+    link: str
 
 @app.get("/api/news")
 def get_news():
@@ -36,7 +41,17 @@ def get_news():
             "description": article["description"] or "",
             "imgURL": article["urlToImage"] or "https://via.placeholder.com/300x200?text=No+Image",
             "link": article["url"],
-            "publishedAt": article["publishedAt"]
+            "publishedAt": article["publishedAt"],
+            "likes": LIKES.get(article["url"], 0)
         })
 
     return result
+
+@app.post("/api/news/like")
+def like_news(data: LikeRequest):
+    link = data.link
+    if link not in LIKES:
+        LIKES[link] = 1
+    else:
+        LIKES[link] += 1
+    return {"link": link, "likes": LIKES[link]}

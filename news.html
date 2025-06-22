@@ -3,108 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Coinspace | Haberler</title>
+  <title>Coinspace | Crypto News</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white font-sans">
 
-  <!-- NAVBAR -->
   <nav class="bg-gray-800 px-6 py-4 shadow-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="index.html" class="text-2xl font-bold text-indigo-400">Coinspace</a>
-      <div class="hidden lg:flex space-x-4">
-        <a href="index.html" class="text-gray-300 hover:text-white">Home</a>
-        <a href="news.html" class="text-indigo-400">News</a>
-        <a href="backtest.html" class="text-gray-300 hover:text-white">Backtest</a>
-      </div>
+      <a href="index.html" class="text-2xl font-bold tracking-wide text-indigo-400">Coinspace</a>
     </div>
   </nav>
 
-  <!-- FILTER BAR -->
-  <section class="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-    <div class="flex space-x-2">
-      <select id="categoryFilter" class="bg-gray-800 text-white px-3 py-2 rounded-md">
-        <option value="">Tüm Kategoriler</option>
-        <option value="crypto">Crypto</option>
-        <option value="regulation">Regulation</option>
-        <option value="altcoins">Altcoins</option>
-      </select>
-      <select id="sortFilter" class="bg-gray-800 text-white px-3 py-2 rounded-md">
-        <option value="newest">Yeni Haberler</option>
-        <option value="oldest">Eski Haberler</option>
+  <header class="max-w-7xl mx-auto px-6 py-10">
+    <h1 class="text-3xl font-bold mb-4 text-indigo-300">📢 Kripto Haberleri</h1>
+    <div class="flex justify-end mb-4">
+      <select id="sortOrder" onchange="renderNews()" class="bg-gray-700 text-white px-3 py-1 rounded">
+        <option value="new">Yeni → Eski</option>
+        <option value="old">Eski → Yeni</option>
       </select>
     </div>
-    <input type="text" id="searchInput" placeholder="Haber ara..." class="bg-gray-800 text-white px-4 py-2 rounded-md w-full md:w-64" />
-  </section>
-
-  <!-- NEWS LIST -->
-  <section class="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-6" id="newsContainer">
-    <!-- Haberler buraya eklenecek -->
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="bg-gray-900 py-10 text-center mt-16 border-t border-gray-800">
-    <p class="text-gray-400 text-sm">&copy; 2025 Coinspace. All rights reserved.</p>
-  </footer>
+    <div id="news-container" class="grid md:grid-cols-3 gap-6"></div>
+  </header>
 
   <script>
-    const API_URL = "http://127.0.0.1:8000/api/news"; // Gerekirse değiştirebilirsin
-    const container = document.getElementById("newsContainer");
     let allNews = [];
 
-    function renderNews(newsList) {
+    function fetchNews() {
+      fetch("http://127.0.0.1:8000/api/news")
+        .then(res => res.json())
+        .then(newsList => {
+          allNews = newsList;
+          renderNews();
+        })
+        .catch(err => console.error("News API error", err));
+    }
+
+    function renderNews() {
+      const sortOrder = document.getElementById("sortOrder").value;
+      const container = document.getElementById("news-container");
       container.innerHTML = "";
-      newsList.forEach(news => {
+
+      let sortedNews = [...allNews];
+      sortedNews.sort((a, b) => sortOrder === "new"
+        ? new Date(b.publishedAt) - new Date(a.publishedAt)
+        : new Date(a.publishedAt) - new Date(b.publishedAt)
+      );
+
+      sortedNews.forEach(news => {
+        const id = btoa(news.link);
         const card = document.createElement("div");
-        card.className = "bg-gray-800 p-4 rounded-xl shadow hover:shadow-xl transition";
+        card.className = "bg-gray-800 p-4 rounded-xl shadow hover:shadow-xl hover:bg-gray-700 transition";
         card.innerHTML = `
           <img src="${news.imgURL}" alt="${news.title}" class="w-full h-40 object-cover rounded mb-3">
           <h3 class="text-lg font-bold">${news.title}</h3>
-          <p class="text-sm text-gray-400 mt-2">${news.description?.slice(0, 100) || ""}...</p>
-          <a href="${news.link}" target="_blank" class="inline-block mt-2 text-indigo-400 text-sm hover:underline">Haberi oku →</a>
+          <p class="text-sm text-gray-400 mt-2">${news.description.slice(0, 100)}...</p>
+          <a href="${news.link}" target="_blank" class="inline-block mt-2 text-indigo-400 text-sm hover:underline">Read more</a>
+          <div class="mt-2 flex items-center space-x-2">
+            <button onclick="likeNews('${news.link}')" class="text-sm text-indigo-400 hover:text-indigo-600">
+              👍 <span id="like-count-${id}">${news.likes || 0}</span>
+            </button>
+          </div>
         `;
         container.appendChild(card);
       });
     }
 
-    function applyFilters() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const category = document.getElementById("categoryFilter").value;
-      const sort = document.getElementById("sortFilter").value;
-
-      let filtered = [...allNews];
-
-      if (category) {
-        filtered = filtered.filter(n => n.category?.toLowerCase().includes(category));
-      }
-
-      if (search) {
-        filtered = filtered.filter(n => n.title.toLowerCase().includes(search) || n.description.toLowerCase().includes(search));
-      }
-
-      if (sort === "newest") {
-        filtered.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-      } else {
-        filtered.sort((a, b) => new Date(a.publishedAt) - new Date(b.publishedAt));
-      }
-
-      renderNews(filtered);
-    }
-
-    fetch(API_URL)
+    function likeNews(link) {
+      fetch('http://127.0.0.1:8000/api/news/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ link })
+      })
       .then(res => res.json())
       .then(data => {
-        allNews = data;
-        applyFilters();
+        const id = 'like-count-' + btoa(link);
+        document.getElementById(id).textContent = data.likes;
       })
-      .catch(err => {
-        container.innerHTML = "<p class='text-red-500'>Haberler yüklenemedi.</p>";
-        console.error(err);
-      });
+      .catch(err => console.error("Like failed", err));
+    }
 
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("categoryFilter").addEventListener("change", applyFilters);
-    document.getElementById("sortFilter").addEventListener("change", applyFilters);
+    fetchNews();
   </script>
 
 </body>
