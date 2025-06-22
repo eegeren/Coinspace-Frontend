@@ -85,22 +85,13 @@
   </div>
 </main>
 
-
-  <!-- CTA SECTION -->
-  <section class="max-w-4xl mx-auto text-center mt-12">
-    <h1 class="text-3xl font-bold text-indigo-400 mb-4">Welcome to Coinspace</h1>
-    <p class="text-gray-300 text-lg mb-6">Your one-stop solution for crypto insights, news, and AI-driven trading tools.</p>
-    <a href="news.html" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-6 rounded transition">
-      📈 Explore News & Signals
-    </a>
-  </section>
-
-  <!-- TIP SECTION -->
+ <!-- TIP SECTION -->
 <section class="max-w-4xl mx-auto bg-gray-800 text-white p-6 mt-10 rounded-xl shadow">
   <h2 class="text-xl font-semibold text-indigo-400 mb-2">💡 Investor Tip of the Day</h2>
   <p id="tipText" class="text-gray-300 text-sm"></p>
 </section>
 
+ 
 <script>
   const tips = [
     "Diversify your portfolio to reduce risk exposure.",
@@ -168,6 +159,23 @@
     fetchAISignal();
     setInterval(loadNews, 5 * 60 * 1000);
   </script>
+
+  <script>
+  async function loadInvestorTip() {
+    const tips = [
+      "Always set a stop-loss to manage risk effectively.",
+      "Diversify your crypto portfolio across different assets.",
+      "Never invest more than you can afford to lose.",
+      "Use both technical and fundamental analysis for better trades.",
+      "Stay updated with market news and on-chain metrics."
+    ];
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    document.getElementById("tipText").textContent = tip;
+  }
+
+  loadInvestorTip();
+</script>
+
 
 </body>
 </html>
