@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Haber Detayı | Coinspace</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+  <!-- NAVBAR -->
+  <nav class="bg-gray-800 px-6 py-4 shadow-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="index.html" class="text-2xl font-bold tracking-wide text-indigo-400">Coinspace</a>
+    </div>
+  </nav>
+
+  <!-- DETAIL -->
+  <main class="max-w-4xl mx-auto px-6 py-10">
+    <div id="news-detail" class="bg-gray-800 p-6 rounded-xl shadow-lg">
+      <h1 id="news-title" class="text-2xl font-bold mb-4 text-indigo-300">Yükleniyor...</h1>
+      <img id="news-img" class="w-full h-64 object-cover rounded mb-6" src="" alt="">
+      <p id="news-date-cat" class="text-sm text-gray-400 mb-4"></p>
+      <p id="news-summary" class="text-base text-white leading-relaxed"></p>
+      <a id="original-link" href="#" target="_blank" class="block mt-6 text-sm text-indigo-400 hover:underline">Orijinal Haberi Gör</a>
+    </div>
+  </main>
+
+  <!-- JS -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    fetch("http://127.0.0.1:8000/api/news")
+      .then(res => res.json())
+      .then(newsList => {
+        const news = newsList.find(n => n.id == id);
+        if (!news) {
+          document.getElementById("news-detail").innerHTML = "<p class='text-red-400'>Haber bulunamadı.</p>";
+          return;
+        }
+
+        document.getElementById("news-title").textContent = news.title;
+        document.getElementById("news-img").src = news.imgURL;
+        document.getElementById("news-summary").textContent = news.summary;
+        document.getElementById("news-date-cat").textContent = `${new Date(news.created_at).toLocaleDateString()} | ${news.category} | 🔥 ${news.popularity}`;
+        document.getElementById("original-link").href = news.link;
+      })
+      .catch(err => {
+        document.getElementById("news-detail").innerHTML = "<p class='text-red-400'>Detay yüklenemedi.</p>";
+      });
+  </script>
+
+</body>
+</html>

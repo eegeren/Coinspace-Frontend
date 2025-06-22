@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto News | Coinspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+  <div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-indigo-400">📰 Güncel Kripto Haberleri</h1>
+      <div class="flex space-x-4">
+        <input type="text" id="search" placeholder="Ara..." class="px-3 py-1 rounded bg-gray-700 text-white text-sm">
+        <select id="sort" class="px-2 py-1 rounded bg-gray-700 text-white text-sm">
+          <option value="newest">Yeni</option>
+          <option value="oldest">Eski</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="news-list" class="grid md:grid-cols-3 gap-6"></div>
+  </div>
+
+  <script>
+    let allNews = [];
+
+    async function fetchNews() {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/news");
+        const data = await res.json();
+        allNews = data;
+        renderNews(data);
+      } catch (err) {
+        console.error("Haberler yüklenemedi:", err);
+      }
+    }
+
+    function renderNews(newsItems) {
+      const container = document.getElementById("news-list");
+      container.innerHTML = "";
+      newsItems.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "bg-gray-800 p-4 rounded-xl shadow hover:shadow-lg transition";
+        div.innerHTML = `
+          <img src="${item.imgURL}" class="w-full h-40 object-cover rounded mb-2">
+          <h3 class="text-lg font-bold mb-1">${item.title}</h3>
+          <p class="text-sm text-gray-400 mb-2">${item.description.slice(0, 100)}...</p>
+          <a href="${item.link}" target="_blank" class="text-indigo-400 text-sm hover:underline">Habere Git</a>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById("search").addEventListener("input", e => {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = allNews.filter(n => n.title.toLowerCase().includes(keyword) || n.description.toLowerCase().includes(keyword));
+      renderNews(filtered);
+    });
+
+    document.getElementById("sort").addEventListener("change", e => {
+      const sorted = [...allNews].sort((a, b) => {
+        return e.target.value === "oldest"
+          ? new Date(a.publishedAt) - new Date(b.publishedAt)
+          : new Date(b.publishedAt) - new Date(a.publishedAt);
+      });
+      renderNews(sorted);
+    });
+
+    fetchNews();
+  </script>
+
+</body>
+</html>
