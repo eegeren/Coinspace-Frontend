@@ -6,145 +6,147 @@
   <title>Coinspace News</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    .news-card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .news-card:hover {
+    .card:hover {
       transform: scale(1.03);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: 0.3s ease;
     }
-    .preview-box {
-      position: absolute;
-      z-index: 50;
-      background-color: rgba(0,0,0,0.9);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      width: 300px;
-      color: white;
-      font-size: 0.875rem;
+    .preview-tooltip {
       display: none;
+      position: absolute;
+      background-color: #2d3748;
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 20;
     }
   </style>
 </head>
-<body class="bg-gray-900 text-white font-sans relative">
+<body class="bg-gray-900 text-white font-sans">
 
-  <!-- NAVBAR -->
-  <nav class="bg-gray-800 px-6 py-4 shadow-md mb-8">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <a href="index.html" class="text-2xl font-bold tracking-wide text-indigo-400">Coinspace</a>
-      <div class="space-x-4">
-        <a href="index.html" class="text-sm text-gray-300 hover:text-white">Home</a>
-        <a href="backtest.html" class="text-sm text-gray-300 hover:text-white">Backtest</a>
-        <a href="news.html" class="text-sm text-indigo-400 font-semibold">News</a>
-      </div>
+  <!-- Navbar -->
+  <nav class="bg-gray-800 px-6 py-4 flex justify-between items-center">
+    <a href="index.html" class="text-2xl font-bold text-indigo-400">Coinspace</a>
+    <div class="space-x-4">
+      <a href="index.html" class="text-gray-300 hover:text-white">Home</a>
+      <a href="backtest.html" class="text-gray-300 hover:text-white">Backtest</a>
+      <a href="news.html" class="text-indigo-400 font-semibold">News</a>
     </div>
   </nav>
 
-  <!-- CONTROLS -->
-  <main class="max-w-7xl mx-auto px-6 py-4 relative">
-    <div class="flex justify-end items-center space-x-4 mb-4">
-      <select id="sortSelect" class="bg-gray-800 text-white px-3 py-1 rounded border border-gray-700">
-        <option value="newest">Newest</option>
-        <option value="oldest">Oldest</option>
-        <option value="popular">Most Liked</option>
-      </select>
-      <input id="searchInput" type="text" placeholder="Search news..." class="px-3 py-1 rounded bg-gray-800 text-white border border-gray-700 w-48">
-    </div>
+  <!-- Filters -->
+  <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+    <select id="sort" class="bg-gray-800 text-white px-4 py-2 rounded">
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+    </select>
+    <input id="search" type="text" placeholder="Search..." class="bg-gray-800 text-white px-4 py-2 rounded w-1/3"/>
+  </div>
 
-    <!-- NEWS -->
-    <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-  </main>
+  <!-- News Container -->
+  <div id="news-container" class="max-w-7xl mx-auto grid md:grid-cols-3 gap-6 px-4 pb-20 relative"></div>
 
-  <!-- PREVIEW -->
-  <div id="previewBox" class="preview-box"></div>
+  <!-- Preview Tooltip -->
+  <div id="preview" class="preview-tooltip"></div>
 
-  <!-- FOOTER -->
-  <footer class="bg-gray-800 text-center py-6 mt-12 border-t border-gray-700">
-    <p class="text-gray-400 text-sm">© 2025 Coinspace. All rights reserved.</p>
+  <!-- Footer -->
+  <footer class="bg-gray-900 border-t border-gray-800 py-6 text-center text-sm text-gray-400">
+    &copy; 2025 Coinspace. All rights reserved.
   </footer>
 
-  <!-- JS -->
   <script>
-    let newsList = [];
+    const newsContainer = document.getElementById("news-container");
+    const previewBox = document.getElementById("preview");
+    const likedNews = new Set();
+    let newsData = [];
 
-    function renderNews(filtered = newsList) {
-      const container = document.getElementById("news-container");
-      container.innerHTML = "";
+    fetch("/api/news")
+      .then(res => res.json())
+      .then(data => {
+        newsData = data;
+        renderNews(data);
+      });
 
-      filtered.forEach(news => {
-        const card = document.createElement("div");
-        card.className = "bg-gray-800 p-4 rounded-xl shadow news-card relative";
-        card.innerHTML = `
-          <img src="${news.imgURL}" alt="${news.title}" class="w-full h-40 object-cover rounded mb-3">
-          <h3 class="text-lg font-bold">${news.title}</h3>
-          <p class="text-sm text-gray-400 mt-2">${news.description.slice(0, 100)}...</p>
-          <a href="${news.link}" target="_blank" class="inline-block mt-2 text-indigo-400 text-sm hover:underline">Read more</a>
-          <div class="mt-3 text-sm flex justify-between items-center">
-            <span class="text-gray-400">${new Date(news.publishedAt).toLocaleString()}</span>
-            <button class="like-btn bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-1 rounded" onclick="likeNews('${news.title}')">
-              👍 Like (<span id="like-${news.title}">${news.likes || 0}</span>)
+    function renderNews(data) {
+      newsContainer.innerHTML = "";
+      data.forEach((news, idx) => {
+        const id = `news-${idx}`;
+        const div = document.createElement("div");
+        div.className = "bg-gray-800 p-4 rounded-xl shadow card relative";
+        div.innerHTML = `
+          <img src="${news.imgURL}" class="w-full h-40 object-cover rounded mb-3">
+          <h3 class="text-md font-bold mb-1">${news.title}</h3>
+          <p class="text-sm text-gray-400 mb-2">${news.description.slice(0, 100)}...</p>
+          <a href="${news.link}" target="_blank" class="text-indigo-400 text-sm hover:underline">Read more</a>
+          <div class="flex items-center justify-between mt-3">
+            <span class="text-xs text-gray-500">${new Date(news.publishedAt).toLocaleString()}</span>
+            <button onclick="toggleLike('${id}')" id="like-${id}" class="bg-indigo-500 text-sm px-3 py-1 rounded">
+              👍 Like (<span id="like-count-${id}">${news.likes || 0}</span>)
             </button>
           </div>
         `;
-
-        // Hover & hold preview logic
-        let previewTimer;
-        card.addEventListener("mouseenter", (e) => {
-          previewTimer = setTimeout(() => {
-            const preview = document.getElementById("previewBox");
-            preview.innerText = news.description;
-            preview.style.display = "block";
-            preview.style.left = `${e.pageX + 10}px`;
-            preview.style.top = `${e.pageY + 10}px`;
-          }, 1000); // Hold for 1 second
-        });
-        card.addEventListener("mouseleave", () => {
-          clearTimeout(previewTimer);
-          document.getElementById("previewBox").style.display = "none";
-        });
-
-        container.appendChild(card);
+        addHoverPreview(div, news.summary);
+        newsContainer.appendChild(div);
       });
     }
 
-    function likeNews(title) {
-      fetch(`http://127.0.0.1:8000/api/news/like?title=${encodeURIComponent(title)}`)
-        .then(() => {
-          const el = document.getElementById(`like-${title}`);
-          if (el) el.textContent = parseInt(el.textContent) + 1;
-        });
+    function toggleLike(id) {
+      const btn = document.getElementById(`like-${id}`);
+      const countEl = document.getElementById(`like-count-${id}`);
+      let count = parseInt(countEl.textContent);
+
+      if (likedNews.has(id)) {
+        likedNews.delete(id);
+        count--;
+        btn.classList.remove("bg-green-500");
+        btn.classList.add("bg-indigo-500");
+      } else {
+        likedNews.add(id);
+        count++;
+        btn.classList.remove("bg-indigo-500");
+        btn.classList.add("bg-green-500");
+      }
+
+      countEl.textContent = count;
     }
 
-    function applyFilters() {
-      let filtered = [...newsList];
-      const keyword = document.getElementById("searchInput").value.toLowerCase();
-      const sortBy = document.getElementById("sortSelect").value;
+    function addHoverPreview(card, text) {
+      let timer;
+      card.addEventListener("mouseenter", (e) => {
+        timer = setTimeout(() => {
+          previewBox.textContent = text;
+          previewBox.style.display = "block";
+          previewBox.style.top = `${e.clientY + 10}px`;
+          previewBox.style.left = `${e.clientX + 10}px`;
+        }, 800);
+      });
+      card.addEventListener("mousemove", (e) => {
+        previewBox.style.top = `${e.clientY + 10}px`;
+        previewBox.style.left = `${e.clientX + 10}px`;
+      });
+      card.addEventListener("mouseleave", () => {
+        clearTimeout(timer);
+        previewBox.style.display = "none";
+      });
+    }
 
-      if (keyword) {
-        filtered = filtered.filter(news => news.title.toLowerCase().includes(keyword));
-      }
-
-      if (sortBy === "newest") {
-        filtered.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-      } else if (sortBy === "oldest") {
-        filtered.sort((a, b) => new Date(a.publishedAt) - new Date(b.publishedAt));
-      } else if (sortBy === "popular") {
-        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      }
-
+    // Filters
+    document.getElementById("search").addEventListener("input", e => {
+      const val = e.target.value.toLowerCase();
+      const filtered = newsData.filter(n => n.title.toLowerCase().includes(val) || n.description.toLowerCase().includes(val));
       renderNews(filtered);
-    }
+    });
 
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("sortSelect").addEventListener("change", applyFilters);
-
-    fetch("http://127.0.0.1:8000/api/news")
-      .then(res => res.json())
-      .then(data => {
-        newsList = data;
-        applyFilters();
+    document.getElementById("sort").addEventListener("change", e => {
+      const val = e.target.value;
+      const sorted = [...newsData].sort((a, b) => {
+        return val === "newest"
+          ? new Date(b.publishedAt) - new Date(a.publishedAt)
+          : new Date(a.publishedAt) - new Date(b.publishedAt);
       });
+      renderNews(sorted);
+    });
   </script>
-
 </body>
 </html>
