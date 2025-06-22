@@ -6,12 +6,23 @@
   <title>Coinspace News</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    .news-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .news-card:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+    .news-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .news-card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
     .preview-box {
-      position: absolute; z-index: 50; background-color: rgba(0,0,0,0.9);
-      padding: 1rem; border-radius: 0.5rem; width: 300px; color: white;
-      font-size: 0.875rem; display: none;
+      position: absolute;
+      z-index: 50;
+      background-color: rgba(0,0,0,0.9);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      width: 300px;
+      color: white;
+      font-size: 0.875rem;
+      display: none;
     }
   </style>
 </head>
@@ -29,7 +40,7 @@
     </div>
   </nav>
 
-  <!-- TOOLS -->
+  <!-- CONTROLS -->
   <main class="max-w-7xl mx-auto px-6">
     <div class="flex flex-wrap justify-between items-center mb-6 space-y-2 md:space-y-0">
       <div class="flex space-x-4">
@@ -50,6 +61,7 @@
 
     <!-- NEWS SECTION -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="news-container"></div>
+    <div id="loader" class="text-center text-gray-400 py-6">Loading more news...</div>
 
     <!-- PREVIEW -->
     <div id="previewBox" class="preview-box"></div>
@@ -63,13 +75,31 @@
   <!-- SCRIPT -->
   <script>
     let newsList = [];
+    let page = 1;
+    const limit = 12;
+    let loading = false;
     const previewBox = document.getElementById("previewBox");
     const likedSet = new Set();
 
-    function renderNews(list = newsList) {
-      const container = document.getElementById("news-container");
-      container.innerHTML = "";
+    async function loadMoreNews() {
+      if (loading) return;
+      loading = true;
+      document.getElementById("loader").style.display = "block";
 
+      const res = await fetch(`http://127.0.0.1:8000/api/news?page=${page}&limit=${limit}`);
+      const data = await res.json();
+      newsList.push(...data);
+      applyFilters();
+      page++;
+      loading = false;
+
+      if (data.length < limit) {
+        document.getElementById("loader").textContent = "No more news available.";
+      }
+    }
+
+    function renderNews(list) {
+      const container = document.getElementById("news-container");
       list.forEach(news => {
         const id = btoa(news.title).slice(0,10);
         const div = document.createElement("div");
@@ -92,7 +122,6 @@
           </div>
         `;
 
-        // Hover preview
         let timer;
         div.addEventListener("mouseenter", e => {
           timer = setTimeout(() => {
@@ -144,22 +173,21 @@
     }
 
     function showSummary(link) {
-      alert("🤖 AI summary feature coming soon!\n\nOr link summary for: " + link);
-      // future: fetch summary from backend
+      alert("🤖 AI summary feature coming soon!\n\nLink: " + link);
     }
 
-    // EVENTS
+    // Scroll detection for infinite loading
+    window.addEventListener("scroll", () => {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+        loadMoreNews();
+      }
+    });
+
     document.getElementById("sortSelect").addEventListener("change", applyFilters);
     document.getElementById("categorySelect").addEventListener("change", applyFilters);
     document.getElementById("searchInput").addEventListener("input", applyFilters);
 
-    // FETCH NEWS
-    fetch("http://127.0.0.1:8000/api/news")
-      .then(res => res.json())
-      .then(data => {
-        newsList = data;
-        applyFilters();
-      });
+    loadMoreNews(); // Initial fetch
   </script>
 </body>
 </html>
