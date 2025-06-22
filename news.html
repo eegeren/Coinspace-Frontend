@@ -6,33 +6,22 @@
   <title>Coinspace News</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    .news-card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .news-card:hover {
-      transform: scale(1.03);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    }
+    .news-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .news-card:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
     .preview-box {
-      position: absolute;
-      z-index: 50;
-      background-color: rgba(0,0,0,0.9);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      width: 300px;
-      color: white;
-      font-size: 0.875rem;
-      display: none;
+      position: absolute; z-index: 50; background-color: rgba(0,0,0,0.9);
+      padding: 1rem; border-radius: 0.5rem; width: 300px; color: white;
+      font-size: 0.875rem; display: none;
     }
   </style>
 </head>
 <body class="bg-gray-900 text-white font-sans relative">
 
-  <!-- NAVBAR -->
-  <nav class="bg-gray-800 px-6 py-4 shadow-md mb-6">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
+  <!-- Navbar -->
+  <nav class="bg-gray-800 px-4 py-4 shadow-md mb-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0">
       <a href="index.html" class="text-2xl font-bold tracking-wide text-indigo-400">Coinspace</a>
-      <div class="space-x-4">
+      <div class="flex space-x-4">
         <a href="index.html" class="text-sm text-gray-300 hover:text-white">Home</a>
         <a href="backtest.html" class="text-sm text-gray-300 hover:text-white">Backtest</a>
         <a href="news.html" class="text-sm text-indigo-400 font-semibold">News</a>
@@ -40,66 +29,45 @@
     </div>
   </nav>
 
-  <!-- CONTROLS -->
-  <main class="max-w-7xl mx-auto px-6">
-    <div class="flex flex-wrap justify-between items-center mb-6 space-y-2 md:space-y-0">
-      <div class="flex space-x-4">
-        <select id="sortSelect" class="bg-gray-800 text-white px-3 py-1 rounded border border-gray-700">
+  <!-- Filters -->
+  <main class="max-w-7xl mx-auto px-4">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+      <div class="flex space-x-2 w-full md:w-auto">
+        <select id="sortSelect" class="w-full md:w-auto bg-gray-800 text-white px-3 py-2 rounded border border-gray-700">
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
           <option value="popular">Most Liked</option>
         </select>
-        <select id="categorySelect" class="bg-gray-800 text-white px-3 py-1 rounded border border-gray-700">
+        <select id="categorySelect" class="w-full md:w-auto bg-gray-800 text-white px-3 py-2 rounded border border-gray-700">
           <option value="all">All</option>
           <option value="btc">Bitcoin</option>
           <option value="eth">Ethereum</option>
           <option value="altcoin">Altcoin</option>
         </select>
       </div>
-      <input id="searchInput" type="text" placeholder="Search news..." class="px-3 py-1 rounded bg-gray-800 text-white border border-gray-700 w-60">
+      <input id="searchInput" type="text" placeholder="Search news..." class="w-full md:w-60 px-3 py-2 rounded bg-gray-800 text-white border border-gray-700">
     </div>
 
-    <!-- NEWS SECTION -->
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="news-container"></div>
-    <div id="loader" class="text-center text-gray-400 py-6">Loading more news...</div>
-
-    <!-- PREVIEW -->
+    <!-- News -->
+    <div id="news-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     <div id="previewBox" class="preview-box"></div>
   </main>
 
-  <!-- FOOTER -->
+  <!-- Footer -->
   <footer class="bg-gray-800 text-center py-6 mt-12 border-t border-gray-700">
     <p class="text-gray-400 text-sm">© 2025 Coinspace. All rights reserved.</p>
   </footer>
 
-  <!-- SCRIPT -->
+  <!-- Script -->
   <script>
     let newsList = [];
-    let page = 1;
-    const limit = 12;
-    let loading = false;
     const previewBox = document.getElementById("previewBox");
     const likedSet = new Set();
 
-    async function loadMoreNews() {
-      if (loading) return;
-      loading = true;
-      document.getElementById("loader").style.display = "block";
-
-      const res = await fetch(`http://127.0.0.1:8000/api/news?page=${page}&limit=${limit}`);
-      const data = await res.json();
-      newsList.push(...data);
-      applyFilters();
-      page++;
-      loading = false;
-
-      if (data.length < limit) {
-        document.getElementById("loader").textContent = "No more news available.";
-      }
-    }
-
-    function renderNews(list) {
+    function renderNews(list = newsList) {
       const container = document.getElementById("news-container");
+      container.innerHTML = "";
+
       list.forEach(news => {
         const id = btoa(news.title).slice(0,10);
         const div = document.createElement("div");
@@ -173,21 +141,19 @@
     }
 
     function showSummary(link) {
-      alert("🤖 AI summary feature coming soon!\n\nLink: " + link);
+      alert("AI summary feature coming soon!\n\nPreview for: " + link);
     }
-
-    // Scroll detection for infinite loading
-    window.addEventListener("scroll", () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
-        loadMoreNews();
-      }
-    });
 
     document.getElementById("sortSelect").addEventListener("change", applyFilters);
     document.getElementById("categorySelect").addEventListener("change", applyFilters);
     document.getElementById("searchInput").addEventListener("input", applyFilters);
 
-    loadMoreNews(); // Initial fetch
+    fetch("http://127.0.0.1:8000/api/news")
+      .then(res => res.json())
+      .then(data => {
+        newsList = data;
+        applyFilters();
+      });
   </script>
 </body>
 </html>
