@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Backtest | Coinspace</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+  <div class="min-h-screen flex flex-col items-center px-4 py-8 max-w-7xl mx-auto">
+
+    <!-- Info Card -->
+    <div class="bg-indigo-100 text-indigo-900 p-4 rounded-xl mb-8 w-full shadow-md">
+      <h2 class="text-lg font-semibold mb-1">📊 Backtest Paneli Nedir?</h2>
+      <p class="text-sm">
+        Bu araç, seçtiğiniz kripto para birimi ve tarih aralığı için RSI, MA ve MACD gibi teknik göstergelere göre al-sat stratejilerini test eder.
+        Gerçek geçmiş verilerle yapılan bu test, stratejinizin <strong>başarı oranını</strong>, <strong>getirisini</strong> ve <strong>işlem sayısını</strong> görmenizi sağlar.
+      </p>
+    </div>
+
+    <!-- Panel Form -->
+    <div class="bg-gray-800 rounded-xl shadow-lg p-8 w-full">
+      <h2 class="text-2xl font-bold text-center text-indigo-400 mb-6">Backtest Paneli</h2>
+
+      <form id="backtestForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm mb-1">Coin Seçin:</label>
+          <select id="coin" name="coin" class="w-full p-2 rounded bg-gray-700 text-white">
+            <option value="BTCUSDT">BTCUSDT</option>
+            <option value="ETHUSDT">ETHUSDT</option>
+            <option value="SOLUSDT">SOLUSDT</option>
+            <option value="PEPEUSDT">PEPEUSDT</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Başlangıç Tarihi:</label>
+          <input type="date" id="start" name="start" class="w-full p-2 rounded bg-gray-700 text-white">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Bitiş Tarihi:</label>
+          <input type="date" id="end" name="end" class="w-full p-2 rounded bg-gray-700 text-white">
+        </div>
+        <div>
+          <label class="block text-sm mb-1">İndikatörler:</label>
+          <div class="flex space-x-4">
+            <label class="inline-flex items-center"><input type="checkbox" value="RSI" class="form-checkbox indicator"> <span class="ml-2">RSI</span></label>
+            <label class="inline-flex items-center"><input type="checkbox" value="MA" class="form-checkbox indicator"> <span class="ml-2">MA</span></label>
+            <label class="inline-flex items-center"><input type="checkbox" value="MACD" class="form-checkbox indicator"> <span class="ml-2">MACD</span></label>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <button type="button" onclick="runBacktest()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-lg font-semibold">Backtest Başlat</button>
+        </div>
+      </form>
+
+      <!-- Result Panel -->
+      <div id="result" class="mt-8 bg-green-100 text-gray-900 p-4 rounded hidden">
+        <h3 class="text-lg font-semibold mb-2">Sonuç:</h3>
+        <p><strong>Coin:</strong> <span id="res-symbol"></span></p>
+        <p><strong>İşlem Sayısı:</strong> <span id="res-trades"></span></p>
+        <p><strong>Başarılı İşlem:</strong> <span id="res-success"></span></p>
+        <p><strong>Toplam Getiri:</strong> <span id="res-return"></span>%</p>
+      </div>
+
+      <!-- Warning Message -->
+      <div id="warning-box" class="mt-8 hidden"></div>
+
+      <!-- Chart -->
+      <div id="chart-container" class="mt-8 bg-white p-6 rounded-xl hidden overflow-x-auto">
+        <div id="chart" style="width:100%; height:100%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    async function runBacktest() {
+      const coin = document.getElementById('coin').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+      const indicators = Array.from(document.querySelectorAll('.indicator:checked')).map(el => el.value);
+
+      const payload = { symbol: coin, start: start, end: end, indicators: indicators };
+
+      // Reset displays
+      document.getElementById('warning-box').classList.add('hidden');
+      document.getElementById('chart-container').classList.add('hidden');
+
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/backtest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.error || !data.signals || data.signals.length === 0) {
+          throw new Error("Bu tarih aralığında al/sat sinyali yok.");
+        }
+
+        document.getElementById('res-symbol').textContent = data.symbol;
+        document.getElementById('res-trades').textContent = data.trades;
+        let successRate = data.trades > 0 ? ((data.success / data.trades) * 100).toFixed(1) + '%' : '0%';
+        document.getElementById('res-success').textContent = `${data.success} (${successRate})`;
+        document.getElementById('res-return').textContent = data.return_pct;
+        document.getElementById('result').classList.remove('hidden');
+
+        const prices = data.signals.map(s => s.price);
+        const dates = data.signals.map(s => new Date(s.date));
+        const buys = data.signals.filter(s => s.signal === 'BUY');
+        const sells = data.signals.filter(s => s.signal === 'SELL');
+
+        const trace = {
+          x: dates,
+          y: prices,
+          mode: 'lines+markers',
+          type: 'scatter',
+          name: 'Fiyat',
+          line: { color: 'gray' }
+        };
+
+        const buyMarkers = {
+          x: buys.map(b => new Date(b.date)),
+          y: buys.map(b => b.price),
+          mode: 'markers',
+          type: 'scatter',
+          name: 'BUY',
+          marker: { color: 'green', size: 10, symbol: 'triangle-up' }
+        };
+
+        const sellMarkers = {
+          x: sells.map(s => new Date(s.date)),
+          y: sells.map(s => s.price),
+          mode: 'markers',
+          type: 'scatter',
+          name: 'SELL',
+          marker: { color: 'red', size: 10, symbol: 'triangle-down' }
+        };
+
+        Plotly.newPlot('chart', [trace, buyMarkers, sellMarkers], {
+          title: `${data.symbol} Sinyal Grafiği`,
+          paper_bgcolor: '#fff',
+          plot_bgcolor: '#f3f4f6',
+          xaxis: { title: 'Tarih' },
+          yaxis: { title: 'Fiyat (USDT)' },
+          margin: { t: 40, r: 30, l: 50, b: 50 }
+        }, {responsive: true});
+
+        document.getElementById('chart-container').classList.remove('hidden');
+
+      } catch (err) {
+        console.error("Hata:", err.message);
+        const warningBox = document.getElementById('warning-box');
+        warningBox.innerHTML = `
+          <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-xl shadow-md">
+            <p class="font-semibold mb-1">⚠️ ${coin} için ${start} - ${end} aralığında <strong>${indicators.join(', ')}</strong> indikatörlerine göre sinyal bulunamadı.</p>
+            <p class="text-sm">Lütfen tarih aralığını genişletin veya farklı bir coin ve indikatör seçerek tekrar deneyin.</p>
+          </div>
+        `;
+        warningBox.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
