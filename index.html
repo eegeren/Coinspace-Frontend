@@ -9,60 +9,164 @@
 <body class="bg-gray-900 text-white font-sans">
 
   <!-- NAVBAR -->
-  <nav class="bg-gray-800 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16 items-center">
-        <div class="flex items-center">
-          <a href="index.html" class="text-indigo-400 font-bold text-xl">Coinspace</a>
+  <nav class="bg-gray-800 px-6 py-4 shadow-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="index.html" class="text-2xl font-bold tracking-wide text-indigo-400">Coinspace</a>
+      <div class="space-x-4">
+        <a href="index.html" class="text-sm text-indigo-400 font-semibold">Home</a>
+        <a href="backtest.html" class="text-sm text-gray-300 hover:text-white">Backtest</a>
+        <a href="news.html" class="text-sm text-gray-300 hover:text-white">News</a>
+      </div>
+    </div>
+  </nav>
+
+
+<main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+  <!-- LEFT: GRAPH + AI + ECONOMY -->
+  <div class="lg:col-span-2 space-y-6">
+    <!-- GRAPH -->
+    <div class="bg-gray-800 rounded-xl shadow p-4">
+      <h2 class="text-xl font-semibold mb-2 text-indigo-400">Live Crypto Chart</h2>
+      <iframe 
+        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_4e7c3&symbol=BINANCE:BTCUSDT&interval=30&hidesidetoolbar=1&theme=dark"
+        width="100%" height="400" frameborder="0" allowtransparency="true" scrolling="no">
+      </iframe>
+    </div>
+
+    <!-- AI DAILY SIGNAL BOX -->
+    <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
+      <h2 class="text-lg font-semibold text-indigo-400 mb-3">📊 AI Daily Signal</h2>
+      <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+        <div>
+          <p class="text-sm text-gray-400">BTC/USDT</p>
+          <p class="text-2xl font-bold text-green-400">BUY</p>
         </div>
-        <div class="-mr-2 flex lg:hidden">
-          <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
-            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-        </div>
-        <div class="hidden lg:flex space-x-6">
-          <a href="index.html" class="text-gray-300 hover:text-white">Home</a>
-          <a href="backtest.html" class="text-gray-300 hover:text-white">Backtest</a>
-          <a href="news.html" class="text-gray-300 hover:text-white">News</a>
+        <div class="text-right">
+          <p class="text-xs text-gray-400">Accuracy (last 7d):</p>
+          <p class="text-lg font-semibold text-yellow-400">62%</p>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
-      <a href="index.html" class="block text-gray-300 py-2 hover:text-white">Home</a>
-      <a href="backtest.html" class="block text-gray-300 py-2 hover:text-white">Backtest</a>
-      <a href="news.html" class="block text-gray-300 py-2 hover:text-white">News</a>
+    <!-- ECONOMIC CALENDAR SECTION -->
+    <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
+      <h2 class="text-lg font-semibold text-indigo-400 mb-3">📅 Mini Economic Calendar</h2>
+      <div class="space-y-3 text-sm">
+        <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+          <div>
+            <p class="text-white font-medium">🇺🇸 Fed Interest Rate Decision</p>
+            <p class="text-gray-400 text-xs">June 25, 2025 - 15:00 UTC</p>
+          </div>
+          <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
+        </div>
+        <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+          <div>
+            <p class="text-white font-medium">🇪🇺 ECB Press Conference</p>
+            <p class="text-gray-400 text-xs">June 26, 2025 - 13:45 UTC</p>
+          </div>
+          <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">Medium Impact</span>
+        </div>
+        <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+          <div>
+            <p class="text-white font-medium">🇯🇵 BoJ Monetary Policy Statement</p>
+            <p class="text-gray-400 text-xs">June 27, 2025 - 04:00 UTC</p>
+          </div>
+          <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
+        </div>
+      </div>
     </div>
-  </nav>
+  </div>
 
-  <!-- MAIN CONTENT -->
-  <main class="max-w-7xl mx-auto px-6 py-12">
-    <h1 class="text-4xl font-bold text-indigo-400 mb-6">Welcome to Coinspace</h1>
-    <p class="text-gray-300 text-lg mb-4">
-      Your one-stop solution for crypto insights, news, and AI-driven trading tools.
-    </p>
-    <a href="news.html" class="inline-block mt-4 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded transition">
+  <!-- RIGHT: STATIC NEWS -->
+  <div class="bg-gray-800 rounded-xl shadow p-4 relative h-[800px] overflow-auto">
+    <h2 class="text-xl font-semibold mb-4 text-indigo-400">Latest News</h2>
+    <div id="newsScroller" class="space-y-4 text-sm"></div>
+  </div>
+</main>
+
+
+  <!-- CTA SECTION -->
+  <section class="max-w-4xl mx-auto text-center mt-12">
+    <h1 class="text-3xl font-bold text-indigo-400 mb-4">Welcome to Coinspace</h1>
+    <p class="text-gray-300 text-lg mb-6">Your one-stop solution for crypto insights, news, and AI-driven trading tools.</p>
+    <a href="news.html" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-6 rounded transition">
       📈 Explore News & Signals
     </a>
-  </main>
+  </section>
+
+  <!-- TIP SECTION -->
+<section class="max-w-4xl mx-auto bg-gray-800 text-white p-6 mt-10 rounded-xl shadow">
+  <h2 class="text-xl font-semibold text-indigo-400 mb-2">💡 Investor Tip of the Day</h2>
+  <p id="tipText" class="text-gray-300 text-sm"></p>
+</section>
+
+<script>
+  const tips = [
+    "Diversify your portfolio to reduce risk exposure.",
+    "Don't invest money you can't afford to lose.",
+    "Avoid FOMO – never chase hype without doing research.",
+    "Use stop-loss orders to limit potential losses.",
+    "Keep up with market news to stay ahead.",
+    "Invest with a long-term perspective, not short-term emotion.",
+    "Review your portfolio regularly and rebalance as needed.",
+    "Don't put all your crypto into one coin, even if it's trending.",
+    "Always store your assets in secure wallets, not exchanges.",
+    "Understand the fundamentals of a project before investing."
+  ];
+
+  const randomTip = tips[Math.floor(Math.random() * tips.length)];
+  document.getElementById("tipText").textContent = randomTip;
+</script>
 
   <!-- FOOTER -->
   <footer class="bg-gray-800 text-center py-6 mt-12 border-t border-gray-700">
     <p class="text-gray-400 text-sm">© 2025 Coinspace. All rights reserved.</p>
   </footer>
 
-  <!-- JS -->
+  <!-- SCRIPT -->
   <script>
-    const button = document.getElementById("mobile-menu-button");
-    const menu = document.getElementById("mobile-menu");
+    // NEWS LOADING
+    function loadNews() {
+      fetch("http://127.0.0.1:8000/api/news")
+        .then(res => res.json())
+        .then(data => {
+          const scroller = document.getElementById("newsScroller");
+          const limited = data.slice(0, 10);
+          scroller.innerHTML = limited.map(n => `
+            <div class="bg-gray-700 p-3 rounded hover:bg-gray-600 transition">
+              <h3 class="text-sm font-semibold">${n.title}</h3>
+              <p class="text-xs text-gray-400 mt-1">${n.description.slice(0, 60)}...</p>
+              <a href="${n.link}" target="_blank" class="text-indigo-400 text-xs mt-2 inline-block hover:underline">Read more →</a>
+            </div>
+          `).join('');
+        });
+    }
 
-    button.addEventListener("click", () => {
-      menu.classList.toggle("hidden");
-    });
+    // AI SIGNAL LOADING
+    function fetchAISignal() {
+      fetch('http://127.0.0.1:8000/api/signal')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("signal-time").innerText = new Date(data.timestamp).toLocaleString();
+          document.getElementById("signal-status").innerText = data.signal;
+          document.getElementById("signal-status").classList.remove("text-green-400", "text-red-400", "text-yellow-400");
+
+          if (data.signal === "BUY") {
+            document.getElementById("signal-status").classList.add("text-green-400");
+          } else if (data.signal === "SELL") {
+            document.getElementById("signal-status").classList.add("text-red-400");
+          } else {
+            document.getElementById("signal-status").classList.add("text-yellow-400");
+          }
+
+          document.getElementById("signal-accuracy").innerText = data.accuracy;
+        });
+    }
+
+    loadNews();
+    fetchAISignal();
+    setInterval(loadNews, 5 * 60 * 1000);
   </script>
 
 </body>
