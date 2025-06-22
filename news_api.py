@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-NEWS_API_KEY = os.getenv("NEWS_API_KEY") or "506d562e0d4a434c97df2e3a51e4cd1c"
+NEWS_API_KEY = os.getenv("NEWS_API_KEY") or "your_newsapi_key_here"
 
 LIKES = {}
 
@@ -26,7 +26,8 @@ class LikeRequest(BaseModel):
 
 @app.get("/api/news")
 def get_news():
-    url = f"https://newsapi.org/v2/everything?q=crypto&language=en&sortBy=publishedAt&pageSize=15&apiKey={NEWS_API_KEY}"
+    url = f"https://newsapi.org/v2/everything?q=crypto&language=en&sortBy=publishedAt&pageSize=100&apiKey={NEWS_API_KEY}"
+
     response = requests.get(url)
 
     if response.status_code != 200:
