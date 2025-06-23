@@ -1,14 +1,8 @@
-from fastapi import APIRouter
-from datetime import datetime
-import requests
 
+from fastapi import APIRouter
 
 router = APIRouter()
 
 @router.get("/signal")
 def get_signal():
-    return {
-        "timestamp": datetime.utcnow().isoformat(),
-        "signal": "BUY",  # Gerçek sinyal burada üretilebilir
-        "accuracy": "62%"
-    }
+    return {"pair": "BTC/USDT", "signal": "BUY", "accuracy": "62%"}
