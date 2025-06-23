@@ -22,7 +22,7 @@
 
   <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
 
-    <!-- SOL: GRAFİK + TABLO + SİNYAL + TAKVİM -->
+    <!-- SOL: GRAFİK + VERİ KUTULARI -->
     <div class="lg:col-span-2 space-y-6">
 
       <!-- CHART -->
@@ -35,31 +35,36 @@
       </div>
 
       <!-- COIN TABLE -->
-     <table id="coin-table">
-       <thead>
-        <tr><th>Coin</th><th>Price</th><th>Change</th></tr>
-       </thead>
-       <tbody></tbody>
-       </table>
-
-
-      <!-- AI SIGNAL -->
-     <div id="ai-signal-box">
-        <h3>AI Daily Signal</h3>
-        <p id="signal-text">Loading...</p>
-        <p id="accuracy-text"></p>
-     </div>
-
-
-      <!-- ECONOMIC CALENDAR -->
-      <div id="calendar-box">
-       <h3>Mini Economic Calendar</h3>
-        <ul id="calendar-list"></ul>
+      <div class="bg-gray-800 rounded-xl shadow p-4">
+        <h2 class="text-xl font-semibold mb-2 text-indigo-400">Coin Price Change</h2>
+        <table class="w-full text-sm text-left">
+          <thead>
+            <tr>
+              <th class="py-2">Coin</th>
+              <th class="py-2">Price</th>
+              <th class="py-2">Change</th>
+            </tr>
+          </thead>
+          <tbody id="coin-table-body"></tbody>
+        </table>
       </div>
 
+      <!-- AI SIGNAL -->
+      <div class="bg-gray-800 rounded-xl shadow p-4">
+        <h2 class="text-xl font-semibold text-indigo-400 mb-2">AI Daily Signal</h2>
+        <p id="signal-text" class="text-lg font-semibold text-green-400">Loading...</p>
+        <p id="signal-accuracy" class="text-sm text-gray-400"></p>
+      </div>
+
+      <!-- ECONOMIC CALENDAR -->
+      <div class="bg-gray-800 rounded-xl shadow p-4">
+        <h2 class="text-xl font-semibold text-indigo-400 mb-2">Mini Economic Calendar</h2>
+        <ul id="calendar-list" class="text-sm text-gray-300 space-y-1"></ul>
+      </div>
+    </div>
 
     <!-- SAĞ: HABERLER -->
-    <div class="bg-gray-800 rounded-xl shadow p-4 relative h-[800px] overflow-auto">
+    <div class="bg-gray-800 rounded-xl shadow p-4 h-[800px] overflow-auto">
       <h2 class="text-xl font-semibold mb-4 text-indigo-400">Latest News</h2>
       <div id="newsScroller" class="space-y-4 text-sm"></div>
     </div>
@@ -81,7 +86,7 @@
   <script>
     // NEWS
     function loadNews() {
-      fetch("http://127.0.0.1:8000/api/news")
+      fetch("/api/news")
         .then(res => res.json())
         .then(data => {
           const scroller = document.getElementById("newsScroller");
@@ -98,21 +103,11 @@
 
     // AI SIGNAL
     function fetchAISignal() {
-      fetch('http://127.0.0.1:8000/api/signal')
+      fetch('/api/signal')
         .then(res => res.json())
         .then(data => {
-          document.getElementById("signal-status").innerText = data.signal;
-          document.getElementById("signal-status").classList.remove("text-green-400", "text-red-400", "text-yellow-400");
-
-          if (data.signal === "BUY") {
-            document.getElementById("signal-status").classList.add("text-green-400");
-          } else if (data.signal === "SELL") {
-            document.getElementById("signal-status").classList.add("text-red-400");
-          } else {
-            document.getElementById("signal-status").classList.add("text-yellow-400");
-          }
-
-          document.getElementById("signal-accuracy").innerText = data.accuracy;
+          document.getElementById("signal-text").innerText = data.signal;
+          document.getElementById("signal-accuracy").innerText = `Accuracy: ${data.accuracy}%`;
         });
     }
 
@@ -135,6 +130,16 @@
         `).join('');
       });
 
+    // ECONOMIC CALENDAR
+    fetch("/api/calendar")
+      .then(res => res.json())
+      .then(data => {
+        const ul = document.getElementById("calendar-list");
+        ul.innerHTML = data.map(event => `
+          <li><strong>${event.time}</strong>: ${event.event} (${event.country})</li>
+        `).join('');
+      });
+
     // TIP
     const tips = [
       "Diversify your portfolio to reduce risk exposure.",
@@ -147,35 +152,10 @@
     document.getElementById("tipText").textContent = tips[Math.floor(Math.random() * tips.length)];
 
     // INIT
-    loadNews();
     fetchAISignal();
+    loadNews();
     setInterval(loadNews, 5 * 60 * 1000);
-</script>
-
-  <script>
-    async function loadRealData() {
-      try {
-        const signalRes = await fetch('/api/signal');
-        const signalData = await signalRes.json();
-        document.getElementById('signal-text').innerText = signalData.signal;
-        document.getElementById('signal-accuracy').innerText = signalData.accuracy + '%';
-
-        const newsRes = await fetch('/api/news');
-        const newsData = await newsRes.json();
-        const newsList = document.getElementById('news-list');
-        newsData.forEach(n => {
-          const li = document.createElement('li');
-          li.innerText = n.title;
-          newsList.appendChild(li);
-        });
-
-      } catch (err) {
-        console.error('Veri çekme hatası:', err);
-      }
-    }
-
-    window.onload = loadRealData;
-    </script>
+  </script>
 
 </body>
 </html>
