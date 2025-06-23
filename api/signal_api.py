@@ -2,9 +2,6 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/signal")
 async def get_signal():
-    return {
-        "signal": "BUY",
-        "accuracy": "63%"
-    }
+    return {"signal": "BUY", "accuracy": 72.5}

@@ -152,51 +152,30 @@
     setInterval(loadNews, 5 * 60 * 1000);
 </script>
 
-<script>
-async function loadSignal() {
-  const res = await fetch('/api/signal');
-  const data = await res.json();
-  document.getElementById('signal-text').textContent = `Signal: ${data.signal}`;
-  document.getElementById('accuracy-text').textContent = `Accuracy: ${data.accuracy}%`;
-}
+  <script>
+    async function loadRealData() {
+      try {
+        const signalRes = await fetch('/api/signal');
+        const signalData = await signalRes.json();
+        document.getElementById('signal-text').innerText = signalData.signal;
+        document.getElementById('signal-accuracy').innerText = signalData.accuracy + '%';
 
-async function loadCoins() {
-  const res = await fetch('/api/coins');
-  const data = await res.json();
-  const tbody = document.querySelector("#coin-table tbody");
-  tbody.innerHTML = '';
-  data.forEach(coin => {
-    const row = `<tr><td>${coin.name}</td><td>${coin.price}</td><td>${coin.change}</td></tr>`;
-    tbody.innerHTML += row;
-  });
-}
+        const newsRes = await fetch('/api/news');
+        const newsData = await newsRes.json();
+        const newsList = document.getElementById('news-list');
+        newsData.forEach(n => {
+          const li = document.createElement('li');
+          li.innerText = n.title;
+          newsList.appendChild(li);
+        });
 
-async function loadCalendar() {
-  const res = await fetch('/api/calendar');
-  const data = await res.json();
-  const list = document.getElementById("calendar-list");
-  list.innerHTML = '';
-  data.forEach(item => {
-    list.innerHTML += `<li>${item.date} - ${item.event}</li>`;
-  });
-}
+      } catch (err) {
+        console.error('Veri çekme hatası:', err);
+      }
+    }
 
-async function loadNews() {
-  const res = await fetch('/api/news');
-  const data = await res.json();
-  const list = document.getElementById("news-list");
-  list.innerHTML = '';
-  data.forEach(news => {
-    list.innerHTML += `<li><a href="${news.url}" target="_blank">${news.title}</a></li>`;
-  });
-}
-
-loadSignal();
-loadCoins();
-loadCalendar();
-loadNews();
-</script>
-
+    window.onload = loadRealData;
+    </script>
 
 </body>
 </html>
