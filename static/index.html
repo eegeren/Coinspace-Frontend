@@ -95,22 +95,24 @@
       }
     }
 
-    async function loadNews() {
-      try {
-        const res = await fetch("/api/news");
-        const data = await res.json();
-        const scroller = document.getElementById("newsScroller");
-        scroller.innerHTML = data.slice(0, 10).map(n => `
-          <div class="bg-gray-700 p-3 rounded hover:bg-gray-600 transition">
-            <h3 class="text-sm font-semibold">${n.title}</h3>
-            <p class="text-xs text-gray-400 mt-1">${n.description.slice(0, 60)}...</p>
-            <a href="${n.link}" target="_blank" class="text-indigo-400 text-xs mt-2 inline-block hover:underline">Read more →</a>
-          </div>
-        `).join('');
-      } catch (err) {
-        console.error("News error:", err);
-      }
-    }
+   async function loadNews() {
+  try {
+    const res = await fetch("/api/news");
+    const data = await res.json();
+    const scroller = document.getElementById("newsScroller");
+    const limited = data.slice(0, 10);
+    scroller.innerHTML = limited.map(n => `
+      <div class="bg-gray-700 p-3 rounded hover:bg-gray-600 transition">
+        <h3 class="text-sm font-semibold">${n.title}</h3>
+        <p class="text-xs text-gray-400 mt-1">${n.description.slice(0, 60)}...</p>
+        <a href="${n.link}" target="_blank" class="text-indigo-400 text-xs mt-2 inline-block hover:underline">Read more →</a>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error("News error:", err);
+  }
+}
+
 
     async function fetchCalendar() {
       try {
