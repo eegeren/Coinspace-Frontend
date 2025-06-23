@@ -84,37 +84,51 @@
 
   <!-- JS -->
   <script>
-    // NEWS
-    function loadNews() {
-      fetch("/api/news")
-        .then(res => res.json())
-        .then(data => {
-          const scroller = document.getElementById("newsScroller");
-          const limited = data.slice(0, 10);
-          scroller.innerHTML = limited.map(n => `
-            <div class="bg-gray-700 p-3 rounded hover:bg-gray-600 transition">
-              <h3 class="text-sm font-semibold">${n.title}</h3>
-              <p class="text-xs text-gray-400 mt-1">${n.description.slice(0, 60)}...</p>
-              <a href="${n.link}" target="_blank" class="text-indigo-400 text-xs mt-2 inline-block hover:underline">Read more →</a>
-            </div>
-          `).join('');
-        });
+    async function fetchAISignal() {
+      try {
+        const res = await fetch("/api/signal");
+        const data = await res.json();
+        document.getElementById("signal-text").innerText = data.signal;
+        document.getElementById("signal-accuracy").innerText = `Accuracy: ${data.accuracy}%`;
+      } catch (err) {
+        console.error("AI Signal error:", err);
+      }
     }
 
-    // AI SIGNAL
-    function fetchAISignal() {
-      fetch('/api/signal')
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById("signal-text").innerText = data.signal;
-          document.getElementById("signal-accuracy").innerText = `Accuracy: ${data.accuracy}%`;
-        });
+    async function loadNews() {
+      try {
+        const res = await fetch("/api/news");
+        const data = await res.json();
+        const scroller = document.getElementById("newsScroller");
+        scroller.innerHTML = data.slice(0, 10).map(n => `
+          <div class="bg-gray-700 p-3 rounded hover:bg-gray-600 transition">
+            <h3 class="text-sm font-semibold">${n.title}</h3>
+            <p class="text-xs text-gray-400 mt-1">${n.description.slice(0, 60)}...</p>
+            <a href="${n.link}" target="_blank" class="text-indigo-400 text-xs mt-2 inline-block hover:underline">Read more →</a>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error("News error:", err);
+      }
     }
 
-    // COIN TABLE
-    fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5")
-      .then(res => res.json())
-      .then(data => {
+    async function fetchCalendar() {
+      try {
+        const res = await fetch("/api/calendar");
+        const data = await res.json();
+        const ul = document.getElementById("calendar-list");
+        ul.innerHTML = data.map(event => `
+          <li><strong>${event.time}</strong>: ${event.event} (${event.country})</li>
+        `).join('');
+      } catch (err) {
+        console.error("Calendar error:", err);
+      }
+    }
+
+    async function fetchCoins() {
+      try {
+        const res = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5");
+        const data = await res.json();
         const tbody = document.getElementById("coin-table-body");
         tbody.innerHTML = data.map(coin => `
           <tr class="border-t border-gray-700">
@@ -128,19 +142,11 @@
             </td>
           </tr>
         `).join('');
-      });
+      } catch (err) {
+        console.error("Coin fetch error:", err);
+      }
+    }
 
-    // ECONOMIC CALENDAR
-    fetch("/api/calendar")
-      .then(res => res.json())
-      .then(data => {
-        const ul = document.getElementById("calendar-list");
-        ul.innerHTML = data.map(event => `
-          <li><strong>${event.time}</strong>: ${event.event} (${event.country})</li>
-        `).join('');
-      });
-
-    // TIP
     const tips = [
       "Diversify your portfolio to reduce risk exposure.",
       "Don't invest money you can't afford to lose.",
@@ -154,6 +160,8 @@
     // INIT
     fetchAISignal();
     loadNews();
+    fetchCalendar();
+    fetchCoins();
     setInterval(loadNews, 5 * 60 * 1000);
   </script>
 
