@@ -35,68 +35,28 @@
       </div>
 
       <!-- COIN TABLE -->
-      <section>
-        <h2 class="text-xl font-semibold text-indigo-400 mb-4">Kripto Para Fiyatları</h2>
-        <div class="overflow-x-auto bg-gray-800 rounded-xl shadow">
-          <table class="min-w-full text-sm text-white">
-            <thead class="bg-gray-700">
-              <tr>
-                <th class="px-4 py-3 text-left">Coin</th>
-                <th class="px-4 py-3 text-center">Fiyat</th>
-                <th class="px-4 py-3 text-center">24s Değişim</th>
-              </tr>
-            </thead>
-            <tbody id="coin-table-body">
-              <!-- JS ile dinamik veriler -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+     <table id="coin-table">
+       <thead>
+        <tr><th>Coin</th><th>Price</th><th>Change</th></tr>
+       </thead>
+       <tbody></tbody>
+       </table>
+
 
       <!-- AI SIGNAL -->
-      <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
-        <h2 class="text-lg font-semibold text-indigo-400 mb-3">📊 AI Daily Signal</h2>
-        <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
-          <div>
-            <p class="text-sm text-gray-400">BTC/USDT</p>
-            <p id="signal-status" class="text-2xl font-bold text-green-400">BUY</p>
-          </div>
-          <div class="text-right">
-            <p class="text-xs text-gray-400">Accuracy (last 7d):</p>
-            <p id="signal-accuracy" class="text-lg font-semibold text-yellow-400">62%</p>
-          </div>
-        </div>
-      </div>
+     <div id="ai-signal-box">
+        <h3>AI Daily Signal</h3>
+        <p id="signal-text">Loading...</p>
+        <p id="accuracy-text"></p>
+     </div>
+
 
       <!-- ECONOMIC CALENDAR -->
-      <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
-        <h2 class="text-lg font-semibold text-indigo-400 mb-3">📅 Mini Economic Calendar</h2>
-        <div class="space-y-3 text-sm">
-          <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
-            <div>
-              <p class="text-white font-medium">🇺🇸 Fed Interest Rate Decision</p>
-              <p class="text-gray-400 text-xs">June 25, 2025 - 15:00 UTC</p>
-            </div>
-            <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
-          </div>
-          <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
-            <div>
-              <p class="text-white font-medium">🇪🇺 ECB Press Conference</p>
-              <p class="text-gray-400 text-xs">June 26, 2025 - 13:45 UTC</p>
-            </div>
-            <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">Medium Impact</span>
-          </div>
-          <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
-            <div>
-              <p class="text-white font-medium">🇯🇵 BoJ Monetary Policy Statement</p>
-              <p class="text-gray-400 text-xs">June 27, 2025 - 04:00 UTC</p>
-            </div>
-            <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
-          </div>
-        </div>
+      <div id="calendar-box">
+       <h3>Mini Economic Calendar</h3>
+        <ul id="calendar-list"></ul>
       </div>
 
-    </div>
 
     <!-- SAĞ: HABERLER -->
     <div class="bg-gray-800 rounded-xl shadow p-4 relative h-[800px] overflow-auto">
@@ -190,8 +150,53 @@
     loadNews();
     fetchAISignal();
     setInterval(loadNews, 5 * 60 * 1000);
-  </script>
-  
+</script>
+
+<script>
+async function loadSignal() {
+  const res = await fetch('/api/signal');
+  const data = await res.json();
+  document.getElementById('signal-text').textContent = `Signal: ${data.signal}`;
+  document.getElementById('accuracy-text').textContent = `Accuracy: ${data.accuracy}%`;
+}
+
+async function loadCoins() {
+  const res = await fetch('/api/coins');
+  const data = await res.json();
+  const tbody = document.querySelector("#coin-table tbody");
+  tbody.innerHTML = '';
+  data.forEach(coin => {
+    const row = `<tr><td>${coin.name}</td><td>${coin.price}</td><td>${coin.change}</td></tr>`;
+    tbody.innerHTML += row;
+  });
+}
+
+async function loadCalendar() {
+  const res = await fetch('/api/calendar');
+  const data = await res.json();
+  const list = document.getElementById("calendar-list");
+  list.innerHTML = '';
+  data.forEach(item => {
+    list.innerHTML += `<li>${item.date} - ${item.event}</li>`;
+  });
+}
+
+async function loadNews() {
+  const res = await fetch('/api/news');
+  const data = await res.json();
+  const list = document.getElementById("news-list");
+  list.innerHTML = '';
+  data.forEach(news => {
+    list.innerHTML += `<li><a href="${news.url}" target="_blank">${news.title}</a></li>`;
+  });
+}
+
+loadSignal();
+loadCoins();
+loadCalendar();
+loadNews();
+</script>
+
 
 </body>
 </html>
