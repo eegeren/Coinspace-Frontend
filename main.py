@@ -7,15 +7,15 @@ from api.calendar_api import router as calendar_router
 
 app = FastAPI()
 
-# API router'ları
+# Statik dosyaları sunmak için
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
+
+# API'leri ekle
 app.include_router(news_router, prefix="/api")
 app.include_router(signal_router, prefix="/api")
 app.include_router(calendar_router, prefix="/api")
 
-# Statik dosyaları serve et (HTML dosyaları dahil)
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
-
-# Ana sayfa
+# Ana sayfa (örnek)
 @app.get("/")
 def read_root():
     return FileResponse("index.html")

@@ -7,12 +7,14 @@ def get_calendar():
     return [
         {
             "event": "Fed Interest Rate Decision",
-            "date": "2025-06-25 15:00 UTC",
-            "impact": "High"
+            "date": "2025-06-25T15:00:00Z",
+            "impact": "High",
+            "country": "🇺🇸"
         },
         {
             "event": "ECB Press Conference",
-            "date": "2025-06-26 13:45 UTC",
-            "impact": "Medium"
+            "date": "2025-06-26T13:45:00Z",
+            "impact": "Medium",
+            "country": "🇪🇺"
         }
     ]
