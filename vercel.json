@@ -1,4 +1,12 @@
 {
-  "cleanUrls": true,
-  "rewrites": [{ "source": "/", "destination": "/index.html" }]
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    { "src": "/api/.*", "dest": "main.py" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }

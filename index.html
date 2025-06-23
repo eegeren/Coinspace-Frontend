@@ -20,104 +20,106 @@
     </div>
   </nav>
 
+  <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
 
-<main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <!-- SOL: GRAFİK + TABLO + SİNYAL + TAKVİM -->
+    <div class="lg:col-span-2 space-y-6">
 
-  <!-- LEFT: GRAPH + AI + ECONOMY -->
-  <div class="lg:col-span-2 space-y-6">
-    <!-- GRAPH -->
-    <div class="bg-gray-800 rounded-xl shadow p-4">
-      <h2 class="text-xl font-semibold mb-2 text-indigo-400">Live Crypto Chart</h2>
-      <iframe 
-        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_4e7c3&symbol=BINANCE:BTCUSDT&interval=30&hidesidetoolbar=1&theme=dark"
-        width="100%" height="400" frameborder="0" allowtransparency="true" scrolling="no">
-      </iframe>
-    </div>
+      <!-- CHART -->
+      <div class="bg-gray-800 rounded-xl shadow p-4">
+        <h2 class="text-xl font-semibold mb-2 text-indigo-400">Live Crypto Chart</h2>
+        <iframe 
+          src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_4e7c3&symbol=BINANCE:BTCUSDT&interval=30&hidesidetoolbar=1&theme=dark"
+          width="100%" height="400" frameborder="0" allowtransparency="true" scrolling="no">
+        </iframe>
+      </div>
 
-    <!-- AI DAILY SIGNAL BOX -->
-    <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
-      <h2 class="text-lg font-semibold text-indigo-400 mb-3">📊 AI Daily Signal</h2>
-      <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
-        <div>
-          <p class="text-sm text-gray-400">BTC/USDT</p>
-          <p class="text-2xl font-bold text-green-400">BUY</p>
+      <!-- COIN TABLE -->
+      <section>
+        <h2 class="text-xl font-semibold text-indigo-400 mb-4">Kripto Para Fiyatları</h2>
+        <div class="overflow-x-auto bg-gray-800 rounded-xl shadow">
+          <table class="min-w-full text-sm text-white">
+            <thead class="bg-gray-700">
+              <tr>
+                <th class="px-4 py-3 text-left">Coin</th>
+                <th class="px-4 py-3 text-center">Fiyat</th>
+                <th class="px-4 py-3 text-center">24s Değişim</th>
+              </tr>
+            </thead>
+            <tbody id="coin-table-body">
+              <!-- JS ile dinamik veriler -->
+            </tbody>
+          </table>
         </div>
-        <div class="text-right">
-          <p class="text-xs text-gray-400">Accuracy (last 7d):</p>
-          <p class="text-lg font-semibold text-yellow-400">62%</p>
+      </section>
+
+      <!-- AI SIGNAL -->
+      <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
+        <h2 class="text-lg font-semibold text-indigo-400 mb-3">📊 AI Daily Signal</h2>
+        <div class="flex items-center justify-between bg-gray-700 p-3 rounded">
+          <div>
+            <p class="text-sm text-gray-400">BTC/USDT</p>
+            <p id="signal-status" class="text-2xl font-bold text-green-400">BUY</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-gray-400">Accuracy (last 7d):</p>
+            <p id="signal-accuracy" class="text-lg font-semibold text-yellow-400">62%</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- ECONOMIC CALENDAR SECTION -->
-    <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
-      <h2 class="text-lg font-semibold text-indigo-400 mb-3">📅 Mini Economic Calendar</h2>
-      <div class="space-y-3 text-sm">
-        <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
-          <div>
-            <p class="text-white font-medium">🇺🇸 Fed Interest Rate Decision</p>
-            <p class="text-gray-400 text-xs">June 25, 2025 - 15:00 UTC</p>
+      <!-- ECONOMIC CALENDAR -->
+      <div class="bg-gray-800 text-white p-4 rounded-xl shadow">
+        <h2 class="text-lg font-semibold text-indigo-400 mb-3">📅 Mini Economic Calendar</h2>
+        <div class="space-y-3 text-sm">
+          <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+            <div>
+              <p class="text-white font-medium">🇺🇸 Fed Interest Rate Decision</p>
+              <p class="text-gray-400 text-xs">June 25, 2025 - 15:00 UTC</p>
+            </div>
+            <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
           </div>
-          <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
-        </div>
-        <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
-          <div>
-            <p class="text-white font-medium">🇪🇺 ECB Press Conference</p>
-            <p class="text-gray-400 text-xs">June 26, 2025 - 13:45 UTC</p>
+          <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+            <div>
+              <p class="text-white font-medium">🇪🇺 ECB Press Conference</p>
+              <p class="text-gray-400 text-xs">June 26, 2025 - 13:45 UTC</p>
+            </div>
+            <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">Medium Impact</span>
           </div>
-          <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">Medium Impact</span>
-        </div>
-        <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
-          <div>
-            <p class="text-white font-medium">🇯🇵 BoJ Monetary Policy Statement</p>
-            <p class="text-gray-400 text-xs">June 27, 2025 - 04:00 UTC</p>
+          <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+            <div>
+              <p class="text-white font-medium">🇯🇵 BoJ Monetary Policy Statement</p>
+              <p class="text-gray-400 text-xs">June 27, 2025 - 04:00 UTC</p>
+            </div>
+            <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
           </div>
-          <span class="bg-yellow-500 text-gray-900 font-bold text-xs px-2 py-1 rounded">High Impact</span>
         </div>
       </div>
+
     </div>
-  </div>
 
-  <!-- RIGHT: STATIC NEWS -->
-  <div class="bg-gray-800 rounded-xl shadow p-4 relative h-[800px] overflow-auto">
-    <h2 class="text-xl font-semibold mb-4 text-indigo-400">Latest News</h2>
-    <div id="newsScroller" class="space-y-4 text-sm"></div>
-  </div>
-</main>
+    <!-- SAĞ: HABERLER -->
+    <div class="bg-gray-800 rounded-xl shadow p-4 relative h-[800px] overflow-auto">
+      <h2 class="text-xl font-semibold mb-4 text-indigo-400">Latest News</h2>
+      <div id="newsScroller" class="space-y-4 text-sm"></div>
+    </div>
 
- <!-- TIP SECTION -->
-<section class="max-w-4xl mx-auto bg-gray-800 text-white p-6 mt-10 rounded-xl shadow">
-  <h2 class="text-xl font-semibold text-indigo-400 mb-2">💡 Investor Tip of the Day</h2>
-  <p id="tipText" class="text-gray-300 text-sm"></p>
-</section>
+  </main>
 
- 
-<script>
-  const tips = [
-    "Diversify your portfolio to reduce risk exposure.",
-    "Don't invest money you can't afford to lose.",
-    "Avoid FOMO – never chase hype without doing research.",
-    "Use stop-loss orders to limit potential losses.",
-    "Keep up with market news to stay ahead.",
-    "Invest with a long-term perspective, not short-term emotion.",
-    "Review your portfolio regularly and rebalance as needed.",
-    "Don't put all your crypto into one coin, even if it's trending.",
-    "Always store your assets in secure wallets, not exchanges.",
-    "Understand the fundamentals of a project before investing."
-  ];
-
-  const randomTip = tips[Math.floor(Math.random() * tips.length)];
-  document.getElementById("tipText").textContent = randomTip;
-</script>
+  <!-- YATIRIMCI NOTU -->
+  <section class="max-w-4xl mx-auto bg-gray-800 text-white p-6 mt-10 rounded-xl shadow">
+    <h2 class="text-xl font-semibold text-indigo-400 mb-2">💡 Investor Tip of the Day</h2>
+    <p id="tipText" class="text-gray-300 text-sm"></p>
+  </section>
 
   <!-- FOOTER -->
   <footer class="bg-gray-800 text-center py-6 mt-12 border-t border-gray-700">
     <p class="text-gray-400 text-sm">© 2025 Coinspace. All rights reserved.</p>
   </footer>
 
-  <!-- SCRIPT -->
+  <!-- JS -->
   <script>
-    // NEWS LOADING
+    // NEWS
     function loadNews() {
       fetch("http://127.0.0.1:8000/api/news")
         .then(res => res.json())
@@ -134,12 +136,11 @@
         });
     }
 
-    // AI SIGNAL LOADING
+    // AI SIGNAL
     function fetchAISignal() {
       fetch('http://127.0.0.1:8000/api/signal')
         .then(res => res.json())
         .then(data => {
-          document.getElementById("signal-time").innerText = new Date(data.timestamp).toLocaleString();
           document.getElementById("signal-status").innerText = data.signal;
           document.getElementById("signal-status").classList.remove("text-green-400", "text-red-400", "text-yellow-400");
 
@@ -155,27 +156,41 @@
         });
     }
 
+    // COIN TABLE
+    fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5")
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("coin-table-body");
+        tbody.innerHTML = data.map(coin => `
+          <tr class="border-t border-gray-700">
+            <td class="flex items-center gap-2 px-4 py-3">
+              <img src="${coin.image}" alt="${coin.name}" class="w-5 h-5">
+              ${coin.name} (${coin.symbol.toUpperCase()})
+            </td>
+            <td class="text-center px-4 py-3">$${coin.current_price.toLocaleString()}</td>
+            <td class="text-center px-4 py-3 ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}">
+              ${coin.price_change_percentage_24h.toFixed(2)}%
+            </td>
+          </tr>
+        `).join('');
+      });
+
+    // TIP
+    const tips = [
+      "Diversify your portfolio to reduce risk exposure.",
+      "Don't invest money you can't afford to lose.",
+      "Avoid FOMO – never chase hype without doing research.",
+      "Use stop-loss orders to limit potential losses.",
+      "Invest with a long-term perspective, not short-term emotion.",
+      "Always store your assets in secure wallets, not exchanges.",
+    ];
+    document.getElementById("tipText").textContent = tips[Math.floor(Math.random() * tips.length)];
+
+    // INIT
     loadNews();
     fetchAISignal();
     setInterval(loadNews, 5 * 60 * 1000);
   </script>
-
-  <script>
-  async function loadInvestorTip() {
-    const tips = [
-      "Always set a stop-loss to manage risk effectively.",
-      "Diversify your crypto portfolio across different assets.",
-      "Never invest more than you can afford to lose.",
-      "Use both technical and fundamental analysis for better trades.",
-      "Stay updated with market news and on-chain metrics."
-    ];
-    const tip = tips[Math.floor(Math.random() * tips.length)];
-    document.getElementById("tipText").textContent = tip;
-  }
-
-  loadInvestorTip();
-</script>
-
 
 </body>
 </html>
