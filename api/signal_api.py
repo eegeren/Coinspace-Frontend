@@ -1,13 +1,11 @@
 from fastapi import APIRouter
-from datetime import datetime
 
 router = APIRouter()
 
 @router.get("/signal")
-async def get_ai_signal():
+def get_signal():
     return {
-        "pair": "BTC/USDT",
         "signal": "BUY",
         "accuracy": "62%",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": "2025-06-23T08:00:00Z"
     }
