@@ -1,23 +1,20 @@
-
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from api.news_api import router as news_router
-from api.signal_api import router as signal_router
-from api.calendar_api import router as calendar_router
+from fastapi.middleware.cors import CORSMiddleware
+from api.coin_api import router as coin_router
 
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
+# CORS ayarları
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app.include_router(news_router, prefix="/api")
-app.include_router(signal_router, prefix="/api")
-app.include_router(calendar_router, prefix="/api")
-
-@app.get("/")
-def read_root():
-    return FileResponse("index.html")
-
-from api.coin_api import router as coin_router
+# Router ekle
 app.include_router(coin_router, prefix="/api")
 
+@app.get("/")
+def root():
+    return {"message": "Coinspace API is working!"}
